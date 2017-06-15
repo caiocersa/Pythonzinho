@@ -1,0 +1,97 @@
+package codigos;
+
+import java_cup.runtime.*;
+import java.util.*;
+import java.io.*;
+import codigos.Lexico_Para_Sintatico_Projeto;
+
+
+parser code
+{:
+    private Symbol s;  //s recebe o Symbol da classe Symbol
+        
+    public void syntax_error(Symbol s){
+        this.s = s; //recebe simbolo que deu erro        
+    }
+
+    //metodo para pegar o "s"
+    public Symbol getS(){
+        return this.s;  
+}
+:};
+
+terminal IDENT,NEWLINE;
+terminal IF, ELIF, ELSE,WHILE, FOR, BREAK, RANGE;
+terminal FALSO, TRUE;
+terminal INPUT, PRINT;
+terminal DEF, RETORNO, PASS;
+terminal NOT, OR, AND, IN, IS, ISNOT, NOTIN; 
+terminal MAIS, MENOS, VEZES, DIVISAO, PORCENTAGEM, DOISIGUAIS, PARESQ, PARDIR, DOISPONTOS;
+terminal IGUAL, MAIORQ, MENORQ, DIFERENTE, MENORIGUALQ, MAIORIGUALQ, CONCATENACAO; 
+terminal FLOAT, INT, ID, STRING;
+terminal COMENTARIO, COMENTARIOS; 
+terminal VIRGULA;
+
+non terminal inicio_A;
+non terminal operacao_mat_A, operacao_mat_B, operacao_mat_C, numero;
+non terminal print_A,print_B,print_C,print_D,print_E,operadores_mat,operadores_mat2;
+non terminal atribuicao_A;
+non terminal funcdef_A,parametros,compara,def_tudo;
+non terminal while_A,while_B,suite_A,suite_B,suite_C,suite_D,suite_E,suite_F;
+non terminal for_A,range_A;
+non terminal if_A,if_B,if_C;
+non terminal condicional_A,condicional_B, operadores_logico,operadores_logico2; 
+non terminal fim;
+non terminal boolean;
+
+start with inicio_A;
+
+inicio_A ::= print_A NEWLINE inicio_A | atribuicao_A NEWLINE inicio_A | funcdef_A NEWLINE inicio_A | while_A NEWLINE inicio_A | operacao_mat_A NEWLINE inicio_A | for_A NEWLINE inicio_A | if_A NEWLINE inicio_A| condicional_A NEWLINE inicio_A | fim |COMENTARIO inicio_A | COMENTARIOS inicio_A ;
+
+operacao_mat_A ::= operacao_mat_A MAIS operacao_mat_B | operacao_mat_A MENOS operacao_mat_B | operacao_mat_B;
+operacao_mat_B ::= operacao_mat_B VEZES operacao_mat_C | operacao_mat_B DIVISAO operacao_mat_C | operacao_mat_C | operacao_mat_B PORCENTAGEM operacao_mat_C;
+operacao_mat_C ::= ID | numero | boolean | PARESQ operacao_mat_A PARDIR;
+numero ::= INT | FLOAT;
+
+condicional_A ::= condicional_B operadores_logico2 condicional_B | condicional_B | NOT PARESQ condicional_B PARDIR;
+condicional_B ::= operacao_mat_A operadores_logico operacao_mat_A | STRING operadores_logico STRING ;
+operadores_logico ::= DOISIGUAIS | MAIORQ | MENORQ |DIFERENTE | MENORIGUALQ | MAIORIGUALQ;
+operadores_logico2 ::= AND | OR | IS | ISNOT | NOTIN;
+
+atribuicao_A ::= ID IGUAL print_B | ID CONCATENACAO print_B;
+
+boolean ::= FALSO | TRUE;
+
+print_A ::= PRINT PARESQ print_B PARDIR | PRINT PARESQ PARDIR | PRINT | PRINT print_B;
+print_B ::= STRING | ID | numero | INPUT PARESQ PARDIR | ID MAIS print_B | ID VIRGULA print_B | STRING VEZES print_C | STRING VIRGULA print_B | STRING MAIS print_D | INT VEZES print_B | numero VIRGULA print_B | numero operadores_mat2 print_E | FLOAT VEZES print_E | ID VEZES print_E | ID DIVISAO print_E | ID PORCENTAGEM print_E;
+print_C ::= INT | INT VEZES print_C | INT VIRGULA print_B;
+print_D ::= STRING | ID | STRING MAIS print_D | STRING VIRGULA print_B;
+print_E ::=  numero | numero operadores_mat print_E | numero VIRGULA print_B | ID operadores_mat print_E | ID | ID VIRGULA print_B ;
+operadores_mat2 ::= MAIS | MENOS | PORCENTAGEM | DIVISAO;
+
+operadores_mat ::= MAIS | MENOS | VEZES | PORCENTAGEM | DIVISAO;
+
+while_A ::= WHILE condicional_A DOISPONTOS suite_A while_B| WHILE PARESQ condicional_A PARDIR DOISPONTOS suite_A while_B ;
+while_B ::= ELSE DOISPONTOS suite_A | ;
+
+if_A ::= IF condicional_A DOISPONTOS suite_A if_B| IF PARESQ condicional_A PARDIR DOISPONTOS suite_A if_B ;
+if_B ::= ELSE DOISPONTOS suite_A | if_C;
+if_C ::= ELIF condicional_A DOISPONTOS suite_A if_C| ELIF PARESQ condicional_A PARDIR DOISPONTOS suite_A if_C| ;
+
+for_A ::= FOR ID IN range_A DOISPONTOS suite_A | FOR ID IN ID DOISPONTOS suite_A;
+range_A ::= RANGE PARESQ INT PARDIR | RANGE PARESQ INT VIRGULA INT PARDIR | RANGE PARESQ INT VIRGULA INT VIRGULA INT PARDIR;
+
+funcdef_A ::= DEF ID parametros DOISPONTOS suite_D;
+parametros ::= PARESQ compara PARDIR;
+compara ::= def_tudo | def_tudo VIRGULA compara;
+def_tudo ::= ID | STRING | numero;
+
+suite_A ::= NEWLINE suite_B;
+suite_B ::= IDENT suite_C | IDENT BREAK | ;
+suite_C ::= inicio_A suite_B;
+
+suite_D ::= NEWLINE suite_E;
+suite_E ::= IDENT suite_F | IDENT BREAK | IDENT RETORNO| IDENT PASS | ;
+suite_F ::= inicio_A suite_E;
+
+fim ::= ;
